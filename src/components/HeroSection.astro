@@ -1,0 +1,161 @@
+---
+import type { EventEntry } from '../utils/events';
+import { STATUS_META } from '../utils/events';
+import { siteConfig } from '../config/site';
+
+interface Props {
+  event: EventEntry;
+}
+
+const { event } = Astro.props;
+const { data } = event;
+const statusInfo = STATUS_META[data.status];
+
+// テーマ素材ごとのポップな配色ローテーション
+const keywordStyles = [
+  'bg-slate-800 text-white border-slate-700',
+  'bg-pink-100 text-pink-800 border-pink-300',
+  'bg-slate-100 text-slate-700 border-slate-300',
+  'bg-amber-100 text-amber-900 border-amber-300',
+  'bg-sky-100 text-sky-800 border-sky-300',
+  'bg-emerald-100 text-emerald-800 border-emerald-300',
+  'bg-orange-100 text-orange-800 border-orange-300',
+];
+---
+
+<section class="relative overflow-hidden bg-gradient-to-b from-amber-50 via-cream to-cream pt-10 pb-16 sm:pt-16 sm:pb-24">
+  <!-- 背景の絵の具・自然モチーフ装飾 -->
+  <div
+    class="animate-blob-slow pointer-events-none absolute -top-16 -left-16 h-64 w-64 rounded-full bg-sunny/35 blur-2xl sm:h-80 sm:w-80"
+    aria-hidden="true"
+  ></div>
+  <div
+    class="animate-blob-slow pointer-events-none absolute top-24 -right-20 h-72 w-72 rounded-full bg-sky/25 blur-2xl sm:h-96 sm:w-96"
+    style="animation-delay: 1.5s;"
+    aria-hidden="true"
+  ></div>
+
+  <!-- 飛ぶ紙飛行機のSVGイラスト -->
+  <div
+    class="animate-plane-float pointer-events-none absolute top-10 right-6 hidden text-coral/80 sm:right-16 sm:block lg:right-28"
+    aria-hidden="true"
+  >
+    <svg class="h-20 w-20 drop-shadow-sm lg:h-24 lg:w-24" viewBox="0 0 64 64" fill="none">
+      <path
+        d="M58 10L6 30L26 38L34 56L58 10Z"
+        fill="currentColor"
+        fill-opacity="0.18"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linejoin="round"
+      />
+      <path d="M58 10L26 38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+    </svg>
+  </div>
+
+  <div class="relative mx-auto max-w-5xl px-4 text-center sm:px-6">
+    <!-- ステータスバッジ -->
+    <div class="inline-flex flex-wrap items-center justify-center gap-2">
+      <span
+        class={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1 text-xs font-bold sm:text-sm ${statusInfo.badgeClass}`}
+      >
+        <span class="h-2 w-2 rounded-full bg-current"></span>
+        {statusInfo.label}
+      </span>
+      <span class="rounded-full border border-amber-200 bg-white px-4 py-1 text-xs font-bold text-slate-700 sm:text-sm">
+        {data.title}
+      </span>
+    </div>
+
+    <!-- メインキャッチコピー -->
+    <h1 class="font-display mt-6 text-4xl leading-tight font-black tracking-tight text-ink sm:text-5xl lg:text-6xl">
+      <span class="block text-coral">{data.catchphrase}</span>
+    </h1>
+
+    <p class="mx-auto mt-4 max-w-2xl text-base leading-relaxed font-medium text-slate-600 sm:text-lg">
+      {statusInfo.description}
+    </p>
+
+    <!-- テーマ素材キーワード（ポップな装飾タグ） -->
+    <div class="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-2.5" aria-label="テーマ素材">
+      {
+        data.themeKeywords.map((keyword, idx) => (
+          <span
+            class={`font-display inline-flex items-center rounded-2xl border-2 px-4 py-1.5 text-sm font-bold shadow-xs transition-transform hover:-translate-y-0.5 sm:text-base ${
+              keywordStyles[idx % keywordStyles.length]
+            }`}
+          >
+            #{keyword}まみれ
+          </span>
+        ))
+      }
+    </div>
+
+    <!-- 開催基本情報カード -->
+    <div class="mx-auto mt-10 grid max-w-3xl gap-3 rounded-3xl border-2 border-amber-200 bg-white/95 p-5 text-left shadow-md sm:grid-cols-3 sm:gap-4 sm:p-6">
+      <div class="rounded-2xl bg-amber-50/70 p-3.5">
+        <p class="text-xs font-bold text-amber-800">開催日時</p>
+        <p class="font-display mt-1 text-base font-bold text-ink">{data.date}</p>
+        <p class="mt-0.5 text-xs font-medium text-slate-600">{data.time}</p>
+      </div>
+      <div class="rounded-2xl bg-sky-50/70 p-3.5">
+        <p class="text-xs font-bold text-sky-800">会場</p>
+        <p class="font-display mt-1 text-base font-bold text-ink">{siteConfig.venue.name}</p>
+        <p class="mt-0.5 text-xs font-medium text-slate-600">全館・芝生ひろば</p>
+      </div>
+      <div class="rounded-2xl bg-emerald-50/70 p-3.5">
+        <p class="text-xs font-bold text-emerald-800">参加費・対象</p>
+        <p class="font-display mt-1 text-base font-bold text-ink">{data.fee}</p>
+        <p class="mt-0.5 text-xs font-medium text-slate-600">{data.target}</p>
+      </div>
+    </div>
+
+    <!-- ステータスに応じたCTAボタン -->
+    <div class="mt-8 flex flex-wrap items-center justify-center gap-3.5">
+      {
+        data.status === 'open' && (
+          <a
+            href={data.applicationUrl ?? '#programs'}
+            target={data.applicationUrl ? '_blank' : undefined}
+            rel={data.applicationUrl ? 'noopener noreferrer' : undefined}
+            class="font-display inline-flex items-center gap-2 rounded-full bg-coral px-7 py-3.5 text-base font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-orange-600"
+          >
+            {data.applicationUrl ? '参加案内・お申し込みへ' : 'プログラムを見る'}
+            <span aria-hidden="true">→</span>
+          </a>
+        )
+      }
+
+      {
+        data.status === 'finished' && (
+          <a
+            href={`/archive/${data.year}`}
+            class="font-display inline-flex items-center gap-2 rounded-full bg-coral px-7 py-3.5 text-base font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-orange-600"
+          >
+            {data.year}年 開催レポート・写真を見る
+            <span aria-hidden="true">→</span>
+          </a>
+        )
+      }
+
+      {
+        data.status === 'upcoming' && (
+          <a
+            href="#contact"
+            class="font-display inline-flex items-center gap-2 rounded-full bg-coral px-7 py-3.5 text-base font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-orange-600"
+          >
+            出展・ボランティアのお問い合わせ
+            <span aria-hidden="true">→</span>
+          </a>
+        )
+      }
+
+      <a
+        href="/archive"
+        class="font-display inline-flex items-center gap-2 rounded-full border-2 border-amber-300 bg-white px-6 py-3.5 text-base font-bold text-ink shadow-xs transition hover:border-coral hover:text-coral"
+      >
+        過去の開催一覧を見る
+      </a>
+    </div>
+  </div>
+</section>

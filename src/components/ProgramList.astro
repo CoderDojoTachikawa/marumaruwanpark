@@ -1,0 +1,155 @@
+---
+import { Image } from 'astro:assets';
+import type { EventEntry } from '../utils/events';
+
+interface Props {
+  programs: EventEntry['data']['programs'];
+  year: number;
+}
+
+const { programs, year } = Astro.props;
+
+const filterOptions = [
+  { value: 'all', label: 'すべて' },
+  { value: '屋内', label: '屋内' },
+  { value: '芝生広場', label: '芝生広場' },
+] as const;
+---
+
+<section id="programs" class="reveal-on-scroll py-16 sm:py-20">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6">
+    <div class="text-center">
+      <span class="inline-block rounded-full bg-sunny/40 px-4 py-1 text-xs font-bold tracking-wider text-amber-950">
+        PROGRAMS
+      </span>
+      <h2 class="font-display mt-3 text-3xl font-black text-ink sm:text-4xl">
+        参加団体・プログラム紹介
+      </h2>
+      <p class="mx-auto mt-3 max-w-xl text-sm text-slate-600 sm:text-base">
+        {year}年開催の体験コーナーをエリア別にチェックできます。
+      </p>
+    </div>
+
+    {
+      programs.length > 0 ? (
+        <>
+          <!-- エリア別フィルターボタン -->
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-2.5" role="group" aria-label="エリア別絞り込み">
+            {filterOptions.map((option, idx) => (
+              <button
+                type="button"
+                data-area-filter={option.value}
+                aria-pressed={idx === 0 ? 'true' : 'false'}
+                class={`program-filter-btn font-display cursor-pointer rounded-full border-2 px-5 py-2 text-sm font-bold transition ${
+                  idx === 0
+                    ? 'border-coral bg-coral text-white shadow-xs'
+                    : 'border-amber-200 bg-white text-slate-700 hover:border-coral hover:text-coral'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          <!-- プログラムカード一覧 -->
+          <div id="program-grid" class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {programs.map((program) => {
+              const areaBadgeClass =
+                program.area === '芝生広場'
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                  : 'bg-sky-100 text-sky-800 border-sky-200';
+
+              return (
+                <article
+                  data-area={program.area}
+                  class="program-card flex flex-col overflow-hidden rounded-3xl border border-amber-200/90 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                >
+                  {program.image ? (
+                    <div class="aspect-[16/10] w-full overflow-hidden bg-amber-50">
+                      <Image
+                        src={program.image}
+                        alt={`${program.name}のイメージ`}
+                        width={800}
+                        height={500}
+                        class="h-full w-full object-cover transition duration-300 hover:scale-105"
+                      />
+                    </div>
+                  ) : (
+                    <div class="flex aspect-[16/10] w-full items-center justify-center bg-gradient-to-br from-amber-100 to-sky-100">
+                      <span class="font-display text-lg font-bold text-slate-600">{program.area}</span>
+                    </div>
+                  )}
+
+                  <div class="flex flex-1 flex-col p-5">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                      <span class={`rounded-full border px-3 py-0.5 text-xs font-bold ${areaBadgeClass}`}>
+                        {program.area}
+                      </span>
+                      <span class="text-xs font-medium text-slate-500">対象: {program.targetAge}</span>
+                    </div>
+
+                    <h3 class="font-display mt-3 text-lg font-bold leading-snug text-ink">
+                      {program.name}
+                    </h3>
+                    <p class="mt-1 text-xs font-bold text-coral">{program.organization}</p>
+                    <p class="mt-3 flex-1 text-sm leading-relaxed text-slate-600">
+                      {program.description}
+                    </p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <div class="mx-auto mt-10 max-w-2xl rounded-3xl border-2 border-dashed border-amber-300 bg-white/80 p-8 text-center">
+          <p class="font-display text-xl font-bold text-ink">
+            {year}年の参加団体・プログラムはただいま企画準備中です！
+          </p>
+          <p class="mt-2 text-sm text-slate-600">
+            公開までしばらくお待ちください。過去のプログラムの様子は
+            <a href="/archive" class="font-bold text-coral underline underline-offset-4">
+              アーカイブページ
+            </a>
+            からご覧いただけます。
+          </p>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<script>
+  // プログラムカードのエリア別フィルタリング処理
+  const filterButtons = document.querySelectorAll<HTMLButtonElement>('.program-filter-btn');
+  const programCards = document.querySelectorAll<HTMLElement>('.program-card');
+
+  if (filterButtons.length > 0 && programCards.length > 0) {
+    const activeClasses = ['border-coral', 'bg-coral', 'text-white', 'shadow-xs'];
+    const inactiveClasses = ['border-amber-200', 'bg-white', 'text-slate-700'];
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const selectedArea = btn.dataset.areaFilter ?? 'all';
+
+        filterButtons.forEach((otherBtn) => {
+          const isTarget = otherBtn === btn;
+          otherBtn.setAttribute('aria-pressed', String(isTarget));
+          if (isTarget) {
+            otherBtn.classList.add(...activeClasses);
+            otherBtn.classList.remove(...inactiveClasses);
+          } else {
+            otherBtn.classList.remove(...activeClasses);
+            otherBtn.classList.add(...inactiveClasses);
+          }
+        });
+
+        programCards.forEach((card) => {
+          const cardArea = card.dataset.area ?? '';
+          const shouldShow = selectedArea === 'all' || cardArea === selectedArea;
+          card.classList.toggle('hidden', !shouldShow);
+        });
+      });
+    });
+  }
+</script>

@@ -1,0 +1,76 @@
+---
+import { siteConfig } from '../config/site';
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="mt-20 border-t border-amber-200/80 bg-amber-50/70">
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+    <div class="grid gap-8 md:grid-cols-3">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span
+            class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sunny to-coral text-sm font-bold text-white"
+            aria-hidden="true"
+          >
+            〇〇
+          </span>
+          <span class="font-display text-xl font-extrabold text-ink">{siteConfig.siteName}</span>
+        </div>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600">
+          {siteConfig.organizerName}
+          <br />
+          {siteConfig.venue.name}（{siteConfig.venue.postalCode} {siteConfig.venue.address}）
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-sm font-bold tracking-wider text-slate-500">コンテンツ</h2>
+        <ul class="mt-3 space-y-2 text-sm font-medium text-slate-700">
+          <li><a href="/#about" class="hover:text-coral">イベント概要</a></li>
+          <li><a href="/#programs" class="hover:text-coral">参加団体・プログラム</a></li>
+          <li><a href="/#access" class="hover:text-coral">会場・アクセス</a></li>
+          <li><a href="/archive" class="hover:text-coral">過去の開催アーカイブ</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="font-display text-sm font-bold tracking-wider text-slate-500">お問い合わせ・SNS</h2>
+        {
+          siteConfig.contactEmail ? (
+            <p class="mt-3 text-sm text-slate-700">
+              <a
+                href={`mailto:${siteConfig.contactEmail}`}
+                class="font-bold text-coral underline decoration-coral/40 underline-offset-4 hover:decoration-coral"
+              >
+                {siteConfig.contactEmail}
+              </a>
+            </p>
+          ) : (
+            <p class="mt-3 text-xs leading-relaxed text-slate-600">
+              公式SNSのDM、またはお問い合わせ窓口よりご連絡ください。
+            </p>
+          )
+        }
+        <div class="mt-4 flex flex-wrap gap-2">
+          {
+            siteConfig.socialLinks.map((sns) => (
+              <a
+                href={sns.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="rounded-full border border-amber-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-2xs transition hover:border-coral hover:text-coral"
+              >
+                {sns.label}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 border-t border-amber-200/70 pt-6 text-center text-xs text-slate-500">
+      <p>&copy; {currentYear} {siteConfig.organizerName}</p>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,45 @@
+---
+import { Image } from 'astro:assets';
+import type { EventEntry } from '../utils/events';
+
+interface Props {
+  gallery: EventEntry['data']['gallery'];
+  year: number;
+}
+
+const { gallery, year } = Astro.props;
+---
+
+{
+  gallery.length > 0 && (
+    <section class="reveal-on-scroll py-12">
+      <div class="text-center">
+        <span class="inline-block rounded-full bg-pink-100 px-4 py-1 text-xs font-bold tracking-wider text-pink-900">
+          GALLERY
+        </span>
+        <h2 class="font-display mt-3 text-2xl font-black text-ink sm:text-3xl">
+          {year}年 写真ギャラリー
+        </h2>
+      </div>
+
+      <div class="mt-8 grid gap-6 sm:grid-cols-2">
+        {gallery.map((item) => (
+          <figure class="overflow-hidden rounded-3xl border border-amber-200 bg-white shadow-sm">
+            <div class="aspect-[16/10] overflow-hidden bg-amber-50">
+              <Image
+                src={item.image}
+                alt={item.caption}
+                width={800}
+                height={500}
+                class="h-full w-full object-cover transition duration-300 hover:scale-105"
+              />
+            </div>
+            <figcaption class="px-5 py-3.5 text-sm font-medium text-slate-700">
+              {item.caption}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  )
+}

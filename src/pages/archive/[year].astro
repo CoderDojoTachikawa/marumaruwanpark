@@ -1,0 +1,118 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProgramList from '../../components/ProgramList.astro';
+import GalleryGrid from '../../components/GalleryGrid.astro';
+import { siteConfig } from '../../config/site';
+import { buildEventJsonLd, getAllEventsSorted, STATUS_META } from '../../utils/events';
+
+export async function getStaticPaths() {
+  const events = await getAllEventsSorted();
+  return events.map((event) => ({
+    params: { year: String(event.data.year) },
+    props: { event },
+  }));
+}
+
+const { event } = Astro.props;
+const { data } = event;
+const { Content } = await render(event);
+const status = STATUS_META[data.status];
+
+const pageUrl = new URL(`/archive/${data.year}`, Astro.site ?? Astro.url.origin).toString();
+const eventJsonLd = buildEventJsonLd(event, pageUrl);
+
+const pageTitle = `${data.title} 開催詳細・レポート｜${siteConfig.siteName}`;
+---
+
+<BaseLayout title={pageTitle} description={data.summary} jsonLd={eventJsonLd}>
+  <!-- ページヘッダー -->
+  <section class="bg-gradient-to-b from-amber-50 to-cream pt-10 pb-12 sm:pt-14 sm:pb-16">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <nav aria-label="パンくずリスト" class="mb-6 text-xs font-bold text-slate-500">
+        <a href="/" class="hover:text-coral">トップ</a>
+        <span class="mx-2">/</span>
+        <a href="/archive" class="hover:text-coral">過去の開催</a>
+        <span class="mx-2">/</span>
+        <span class="text-ink">{data.year}年</span>
+      </nav>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <span class={`rounded-full border px-3.5 py-1 text-xs font-bold ${status.badgeClass}`}>
+          {status.label}
+        </span>
+        <span class="rounded-full border border-amber-200 bg-white px-3.5 py-1 text-xs font-bold text-slate-700">
+          {data.date}
+        </span>
+      </div>
+
+      <h1 class="font-display mt-4 text-3xl font-black text-ink sm:text-5xl">
+        {data.title}
+      </h1>
+      <p class="font-display mt-2 text-lg font-bold text-coral sm:text-xl">
+        {data.catchphrase}
+      </p>
+
+      <div class="mt-6 flex flex-wrap gap-2">
+        {
+          data.themeKeywords.map((kw) => (
+            <span class="rounded-2xl border border-amber-200 bg-white px-3.5 py-1 text-xs font-bold text-ink">
+              #{kw}まみれ
+            </span>
+          ))
+        }
+      </div>
+
+      <!-- 開催基本データ -->
+      <dl class="mt-8 grid gap-3 rounded-3xl border border-amber-200 bg-white p-5 shadow-xs sm:grid-cols-3">
+        <div>
+          <dt class="text-xs font-bold text-slate-500">日時</dt>
+          <dd class="mt-1 text-sm font-bold text-ink">{data.date} {data.time}</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-bold text-slate-500">会場</dt>
+          <dd class="mt-1 text-sm font-bold text-ink">{siteConfig.venue.name}</dd>
+        </div>
+        <div>
+          <dt class="text-xs font-bold text-slate-500">参加費・対象</dt>
+          <dd class="mt-1 text-sm font-bold text-ink">{data.fee}（{data.target}）</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- Markdown本文（開催レポート） -->
+  <section class="py-10">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6">
+      <div class="rounded-3xl border border-amber-200 bg-white p-6 shadow-xs sm:p-10">
+        <div class="space-y-4 text-base leading-relaxed text-slate-700 [&_a]:font-bold [&_a]:text-coral [&_a]:underline [&_h2]:font-display [&_h2]:mb-3 [&_h2]:text-2xl [&_h2]:font-black [&_h2]:text-ink">
+          <Content />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 実施プログラム一覧 -->
+  <ProgramList programs={data.programs} year={data.year} />
+
+  <!-- 写真ギャラリー -->
+  <div class="mx-auto max-w-5xl px-4 sm:px-6">
+    <GalleryGrid gallery={data.gallery} year={data.year} />
+  </div>
+
+  <!-- 戻る導線 -->
+  <div class="mx-auto mt-10 flex max-w-4xl flex-wrap items-center justify-center gap-4 px-4 pb-10">
+    <a
+      href="/archive"
+      class="font-display inline-flex items-center gap-2 rounded-full border-2 border-amber-300 bg-white px-6 py-3 text-sm font-bold text-ink transition hover:border-coral hover:text-coral"
+    >
+      ← 過去の開催一覧に戻る
+    </a>
+    <a
+      href="/"
+      class="font-display inline-flex items-center gap-2 rounded-full bg-coral px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600"
+    >
+      トップページへ
+    </a>
+  </div>
+</BaseLayout>

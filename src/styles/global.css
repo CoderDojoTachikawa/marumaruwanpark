@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --font-display: "Zen Maru Gothic", "Noto Sans JP", sans-serif;
+
+  --color-cream: #fffdf7;
+  --color-sunny: #ffd23f;
+  --color-coral: #ff6b35;
+  --color-sky: #38bdf8;
+  --color-meadow: #22c55e;
+  --color-ink: #1e293b;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+/* 紙飛行機のふわふわアニメーション */
+@keyframes planeFloat {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-6deg);
+  }
+  50% {
+    transform: translate(12px, -14px) rotate(4deg);
+  }
+}
+
+/* 絵の具・自然モチーフのゆらぎアニメーション */
+@keyframes blobFloat {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-8px, 10px) scale(1.04);
+  }
+}
+
+.animate-plane-float {
+  animation: planeFloat 5.5s ease-in-out infinite;
+}
+
+.animate-blob-slow {
+  animation: blobFloat 7s ease-in-out infinite;
+}
+
+/* スクロールに応じたフェードイン */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* モーション低減設定への配慮 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-plane-float,
+  .animate-blob-slow {
+    animation: none;
+  }
+  .reveal-on-scroll {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
